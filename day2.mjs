@@ -1,0 +1,47 @@
+import { readFile } from 'node:fs/promises';
+
+let input = (await readFile('day2.input.txt')).toString().split('\n');
+
+const availableCubes = {
+    red: 12,
+    green: 13,
+    blue: 14
+};
+
+let sum = 0;
+
+lineLoop: {
+    for (let line of input) {
+        let gameId;
+        let hasEnough = true;
+        const gameIdMatches = line.match(/Game (?<gameId>\d+)/);
+        if (gameIdMatches !== null) {
+            gameId = Number(gameIdMatches.groups.gameId);
+
+            const allRoundsMatch = line.match(/(?<=:\s+)\d.*$/);
+            if (allRoundsMatch !== null) {
+                const roundsText = allRoundsMatch[0];
+
+                roundLoop: {
+                    for (let roundText of roundsText.split(';')) {
+                        cubeLoop: {
+                            for (let cubeDef of roundText.split(',')) {
+                                const parsedCube = cubeDef.match(/(?<count>\d+)\s+(?<color>\w+)/);
+                                if (parsedCube !== null && parsedCube.groups.count > availableCubes[parsedCube.groups.color]) {
+                                    hasEnough = false;
+                                    break roundLoop;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (hasEnough) {
+                    sum += gameId;
+                }
+            }
+        }
+    }
+}
+
+console.log(sum);
